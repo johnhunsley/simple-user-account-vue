@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import modal from './Modal.vue'
+import modal from './Modal.vue';
 
 export default {
     name: 'pager',
