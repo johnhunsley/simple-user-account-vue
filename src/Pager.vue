@@ -32,7 +32,7 @@
             <button id="next" v-bind:disabled="!hasNext" value="Next" @click="searchItems(10,nextPageNumber)">Next</button>
             <button style="float: right" id="new" value="New" @click="showModal = true">New</button>
         </div>
-        <div id="modal" v-if="showModal"></div>
+        <modal v-show="showModal" v-on:resetShowModal="showModal = false"></modal>
     </div>
 </template>
 
@@ -41,6 +41,9 @@ import modal from './Modal.vue';
 
 export default {
     name: 'pager',
+    components: {
+      modal
+    },
     data () {
         return {
             showModal: false,
@@ -94,6 +97,11 @@ export default {
             } else {
                 this.hasPrevious = false;
             }
+        }
+    },
+    events: {
+        resetShowModal : function(data) {
+            this.showModal = data;
         }
     }
 }
