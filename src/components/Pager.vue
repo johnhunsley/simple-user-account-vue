@@ -38,7 +38,7 @@
 
 <script>
 import modal from './Modal.vue';
-import auth from './auth.js';
+import auth from './../auth.js';
 
 export default {
     name: 'pager',

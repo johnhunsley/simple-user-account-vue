@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import auth from './auth.js'
+import auth from './../auth.js'
 export default {
     data() {
         return {

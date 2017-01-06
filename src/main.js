@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import VueResource from 'vue-resource';
 import VueRouter from 'vue-router';
-import Pager from './Pager.vue';
-import Login from './Login.vue';
+import Pager from './components/Pager.vue';
+import Login from './components/Login.vue';
 import auth from './auth'
 
 Vue.use(VueResource);
