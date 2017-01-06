@@ -26,10 +26,11 @@ export default {
         login : function() {
             this.$http.get('http://localhost:8080/user/username/'+this.username).then(function(data) {
                 //compare password hashes
-
+                console.log(data.body);
                 //if good set the token on the auth object
-
+                auth.login(data.body.password);
                 //redirect to pager vue
+                this.$router.push('/users');
             })
         }
     }

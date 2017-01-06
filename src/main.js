@@ -10,10 +10,12 @@ Vue.use(VueRouter);
 
 function requireAuth(to, from, next) {
   if (!auth.loggedIn()) {
+    console.log('not logged in, forwarding to /login');
     next({
       path: '/login'
     })
   } else {
+    console.log('logged in, forwarding to next()');
     next()
   }
 }

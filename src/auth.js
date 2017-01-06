@@ -4,10 +4,10 @@ export default {
         return localStorage.token;
     },
     loggedIn() {
-        return true;//!!localStorage.token;
+        return !!localStorage.token;
     },
-    login() {
-
+    login(token) {
+        localStorage.token = token;
     },
     logout() {
         delete localStorage.token;

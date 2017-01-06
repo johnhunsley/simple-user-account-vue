@@ -1,6 +1,6 @@
 <template>
     <div id="pager" class="generic-container">
-        <b>System Users</b>
+        <b>System Users</b><button style="float: right" id="logout" value="Log Out" @click="logout">Logout</button>
         <div class="section">
             <input id="filterUsers" class="filter" type="text" @keyup="searchItems(10,1)" v-model.trim="filter"/>
         </div>
@@ -38,6 +38,7 @@
 
 <script>
 import modal from './Modal.vue';
+import auth from './auth.js';
 
 export default {
     name: 'pager',
@@ -97,6 +98,10 @@ export default {
             } else {
                 this.hasPrevious = false;
             }
+        },
+        logout : function() {
+            auth.logout();
+            this.$router.push('/login');
         }
     },
     events: {
