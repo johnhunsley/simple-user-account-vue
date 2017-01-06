@@ -3,18 +3,38 @@ import VueResource from 'vue-resource';
 import VueRouter from 'vue-router';
 import Pager from './Pager.vue';
 import Login from './Login.vue';
+import auth from './auth'
 
 Vue.use(VueResource);
 Vue.use(VueRouter);
 
+function requireAuth(to, from, next) {
+  if (!auth.loggedIn()) {
+    next({
+      path: '/login'
+    })
+  } else {
+    next()
+  }
+}
+
 export var router = new VueRouter({
+  mode: 'history',
   routes : [
-    {path: '/', component: Pager},
+    {path: '/users', component: Pager, beforeEnter: requireAuth},
     {path: '/login', component: Login}
   ]
 });
 
+//new Vue({
+//  el: '#app',
+//  router,
+//  // replace the content of <div id="app"></div> with App
+//  render: h => h()
+//})
+
 var app = new Vue({
+  el: '#app',
   router
-}).$mount('#app')
+})
 
