@@ -9,6 +9,7 @@
                     <td>Password:</td><td><input id="password" class="loginText" type="password" v-model.trim="password"/></td>
             </table>
             <button style="float: left" id="login" value="Login" @click="login">Login</button>
+            <!-- todo - login error message -->
         </div>
     </div>
 </template>
@@ -23,10 +24,11 @@ export default {
         }
     },
     methods : {
+        //todo - This needs refactoring so the server performs the auth and returns a session object/token
         login : function() {
             this.$http.get('http://localhost:8080/user/username/'+this.username).then(function(data) {
-                //compare password hashes
                 console.log(data.body);
+
                 //if good set the token on the auth object
                 auth.login(data.body.password);
                 //redirect to pager vue
