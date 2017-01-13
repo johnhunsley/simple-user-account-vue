@@ -26,11 +26,12 @@ export default {
     methods : {
         //todo - This needs refactoring so the server performs the auth and returns a session object/token
         login : function() {
-            this.$http.get('http://localhost:8080/user/username/'+this.username).then(function(data) {
-                console.log(data.body);
-
+            this.$http.post('http://localhost:8080/auth/login',
+                {'username': this.username, 'password': this.password},
+                {headers: {'X-Requested-With':'XMLHttpRequest', 'Content-Type':'application/json', 'Cache-Control':'no-cache'}}).then(function(data) {
+                console.log(data.body.token);
                 //if good set the token on the auth object
-                auth.login(data.body.password);
+                auth.login(data.body.token);
                 //redirect to pager vue
                 this.$router.push('/users');
             })

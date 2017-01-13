@@ -67,14 +67,16 @@ export default {
         },
 
         getItems: function(pageSize, pageNumber) {
-            this.$http.get('http://localhost:8080/user/page/'+pageSize+"/"+pageNumber)
+            this.$http.get('http://localhost:8080/user/page/'+pageSize+"/"+pageNumber,
+                {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}})
                 .then(function(data){
                     this.calculatePage(data, pageNumber);
                 });
         },
 
         searchItems: function(pageSize, pageNumber) {
-            this.$http.get('http://localhost:8080/user/search/'+pageSize+"/"+pageNumber+"?query="+this.filter)
+            this.$http.get('http://localhost:8080/user/search/'+pageSize+"/"+pageNumber+"?query="+this.filter,
+                {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}})
                 .then(function(data){
                     this.calculatePage(data, pageNumber);
                 });
