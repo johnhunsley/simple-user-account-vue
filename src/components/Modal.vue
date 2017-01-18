@@ -5,19 +5,19 @@
 
                 <div class="modal-header">
                     <slot name="header">
-                        <h3>Edit User</h3>
+                        <h3>New User</h3>
                     </slot>
                 </div>
 
                 <div class="modal-body">
                     <slot name="body">
-                        body
+
                     </slot>
                 </div>
 
                 <div class="modal-footer">
                     <slot name="footer">
-                        footer
+                        &nbsp
                         <button class="modal-default-button" @click="closeModal()">
                             OK
                         </button>
@@ -35,10 +35,11 @@
 
         data () {
             return {
-                show: true
+                show: true,
             }
         },
         methods : {
+
             closeModal:function() {
                 this.show = false;
                 this.$emit('resetShowModal', false);
@@ -111,6 +112,10 @@
         -webkit-transform: scale(1.1);
         transform: scale(1.1);
     }
+        .formText {
+        max-width:300px;
+    }
+
 
 
 </style>

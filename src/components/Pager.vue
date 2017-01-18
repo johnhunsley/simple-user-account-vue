@@ -14,7 +14,7 @@
                     <th>Email</th>
                     <th>Enabled</th>
                 </tr>
-                <tr v-for="user in items">
+                <tr v-for="user in items" @click="edit(user.id)">
                     <td>{{user.id}}</td>
                     <td>{{user.username}}</td>
                     <td>{{user.firstName}}</td>
@@ -30,9 +30,33 @@
                         &nbsp;&nbsp;<span @click="searchItems(10,n)"><b>{{n}}</b></span>
                     </span>
             <button id="next" v-bind:disabled="!hasNext" value="Next" @click="searchItems(10,nextPageNumber)">Next</button>
-            <button style="float: right" id="new" value="New" @click="showModal = true">New</button>
+            <button style="float: right" id="new" value="New" @click="showModal = true ;modalTitle = 'New User'">New</button>
         </div>
-        <modal v-show="showModal" v-on:resetShowModal="showModal = false"></modal>
+        <modal v-show="showModal" v-on:resetShowModal="showModal = false">
+            <h3 slot="header">{{modalTitle}}</h3>
+            <div slot="body" class="formbody">
+                <div class="row">
+                    <label class="left" for="selectedID">ID:</label>
+                    <input type="text" class="formText, right" id="selectedID" v-model.trim="selectedID"/><br/>
+                </div>
+                <div class="row">
+                    <label class="left" for="selectedUsername">Username:</label>
+                    <input type="text" class="formText, right" id="selectedUsername" v-model.trim="selectedUsername"/>
+                </div>
+                <div class="row">
+                    <label class="left" for="selectedFirstName">First Name:</label>
+                    <input type="text" class="formText, right" id="selectedFirstName" v-model.trim="selectedFirstName"/>
+                </div>
+                <div class="row">
+                    <label class="left" for="selectedLastName">Last Name:</label>
+                    <input type="text" class="formText, right" id="selectedLastName" v-model.trim="selectedLastName"/>
+                </div>
+                <div class="row">
+                    <label class="left" for="selectedEmail">Email:</label>
+                    <input type="text" class="formText, right" id="selectedEmail" v-model.trim="selectedEmail"/>
+                </div>
+            </div>
+        </modal>
     </div>
 </template>
 
@@ -43,7 +67,7 @@ import auth from './../auth.js';
 export default {
     name: 'pager',
     components: {
-      modal
+        modal
     },
     data () {
         return {
@@ -55,17 +79,35 @@ export default {
             hasNext:true,
             previousPageNumber: 1,
             hasPrevious: false,
-            filter:""
+            filter:"",
+            modalTitle:"",
+            selectedID: "",
+            selectedUsername: "",
+            selectedFirstName:"",
+            selectedLastName:"",
+            selectedEmail:"",
+            selectedEnabled:false
+
         }
     },
     mounted: function() {
         this.searchItems(10,1);
     },
     methods:{
-        addUser: function() {
-
+        edit: function(userId) {
+            this.$http.get('http://localhost:8080/user/id/'+userId,
+                {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}}).then(function(data) {
+                    console.log(data.body);
+                    this.modalTitle="Edit User";
+                    this.selectedUsername=data.body.username;
+                    this.selectedID=data.body.id;
+                    this.selectedFirstName=data.body.firstName;
+                    this.selectedLastName=data.body.lastName;
+                    this.selectedEmail=data.body.email;
+                    this.selectedEnabled=data.body.enabled;
+                    this.showModal = true;
+                })
         },
-
         getItems: function(pageSize, pageNumber) {
             this.$http.get('http://localhost:8080/user/page/'+pageSize+"/"+pageNumber,
                 {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}})
@@ -206,5 +248,19 @@ export default {
         font-family:Arial, sans-serif;
         font-size:14px;
         padding:10px 5px;
+    }
+        .formbody {
+        display:table;
+    }
+
+        .row {
+        font-family: Helvetica;
+        display:table-row;
+    }
+        .left {
+        display:table-cell;
+    }
+        .right {
+        display:table-cell;
     }
     </style>
