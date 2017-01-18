@@ -96,16 +96,19 @@ export default {
     methods:{
         edit: function(userId) {
             this.$http.get('http://localhost:8080/user/id/'+userId,
-                {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}}).then(function(data) {
-                    console.log(data.body);
+                {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}}).then(function successCallback(response) {
+                    console.log(response.body);
                     this.modalTitle="Edit User";
-                    this.selectedUsername=data.body.username;
-                    this.selectedID=data.body.id;
-                    this.selectedFirstName=data.body.firstName;
-                    this.selectedLastName=data.body.lastName;
-                    this.selectedEmail=data.body.email;
-                    this.selectedEnabled=data.body.enabled;
+                    this.selectedUsername=response.body.username;
+                    this.selectedID=response.body.id;
+                    this.selectedFirstName=response.body.firstName;
+                    this.selectedLastName=response.body.lastName;
+                    this.selectedEmail=response.body.email;
+                    this.selectedEnabled=response.body.enabled;
                     this.showModal = true;
+                }, function errorCallback(response) {
+                    console.log('fuckerty fuck fuck');
+                    this.router.push('/login');
                 })
         },
         getItems: function(pageSize, pageNumber) {
