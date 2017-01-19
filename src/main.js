@@ -23,17 +23,11 @@ function requireAuth(to, from, next) {
 export var router = new VueRouter({
   mode: 'history',
   routes : [
+    {path: '/', redirect: '/users'},
     {path: '/users', component: Pager, beforeEnter: requireAuth},
     {path: '/login', component: Login}
   ]
 });
-
-//new Vue({
-//  el: '#app',
-//  router,
-//  // replace the content of <div id="app"></div> with App
-//  render: h => h()
-//})
 
 var app = new Vue({
   el: '#app',

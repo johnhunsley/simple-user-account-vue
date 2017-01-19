@@ -107,8 +107,8 @@ export default {
                     this.selectedEnabled=response.body.enabled;
                     this.showModal = true;
                 }, function errorCallback(response) {
-                    console.log('fuckerty fuck fuck');
-                    this.router.push('/login');
+                    console.log('Token expired, forcing client to re-authenitcate');
+                    this.$router.push('/login');
                 })
         },
         getItems: function(pageSize, pageNumber) {
