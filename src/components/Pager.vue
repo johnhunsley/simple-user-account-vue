@@ -37,7 +37,7 @@
             <div slot="body" class="formbody">
                 <div class="row">
                     <label class="left" for="selectedID">ID:</label>
-                    <input type="text" class="formText, right" id="selectedID" v-model.trim="selectedID"/><br/>
+                    <input type="text" disabled class="formText, right" id="selectedID" v-model.trim="selectedID"/><br/>
                 </div>
                 <div class="row">
                     <label class="left" for="selectedUsername">Username:</label>
@@ -114,16 +114,22 @@ export default {
         getItems: function(pageSize, pageNumber) {
             this.$http.get('http://localhost:8080/user/page/'+pageSize+"/"+pageNumber,
                 {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}})
-                .then(function(data){
-                    this.calculatePage(data, pageNumber);
+                .then(function successCallback(response){
+                    this.calculatePage(response, pageNumber);
+                },function errorCallback(response) {
+                    console.log('Token expired, forcing client to re-authenitcate');
+                    this.$router.push('/login');
                 });
         },
 
         searchItems: function(pageSize, pageNumber) {
             this.$http.get('http://localhost:8080/user/search/'+pageSize+"/"+pageNumber+"?query="+this.filter,
                 {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}})
-                .then(function(data){
-                    this.calculatePage(data, pageNumber);
+                .then(function successCallback(response) {
+                    this.calculatePage(response, pageNumber);
+                },function errorCallback(response) {
+                    console.log('Token expired, forcing client to re-authenitcate');
+                    this.$router.push('/login');
                 });
         },
 
@@ -152,8 +158,23 @@ export default {
         }
     },
     events: {
-        resetShowModal : function(data) {
-            this.showModal = data;
+        resetShowModal : function() {
+            this.selectedUsername="";
+            this.selectedID="";
+            this.selectedFirstName="";
+            this.selectedLastName="";
+            this.selectedEmail="";
+            this.selectedEnabled="";
+            this.showModal = false;
+        },
+        saveUser : function() {
+            this.selectedUsername="";
+            this.selectedID="";
+            this.selectedFirstName="";
+            this.selectedLastName="";
+            this.selectedEmail="";
+            this.selectedEnabled="";
+            this.showModal = false;
         }
     }
 }
