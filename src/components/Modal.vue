@@ -17,10 +17,8 @@
 
                 <div class="modal-footer">
                     <slot name="footer">
-                        &nbsp
-                        <button class="modal-default-button" @click="closeModal()">
-                            OK
-                        </button>
+                        &nbsp<button class="modal-default-button" @click="cancel()">Cancel</button>
+                        &nbsp<button class="modal-default-button" @click="save()">Save</button>
                     </slot>
                 </div>
             </div>
@@ -35,14 +33,18 @@
 
         data () {
             return {
-                show: true,
+                show: true
             }
         },
         methods : {
 
-            closeModal:function() {
+            cancel:function() {
                 this.show = false;
-                this.$emit('resetShowModal', false);
+                this.$emit('resetShowModal');
+            },
+            save: function() {
+                this.show = false;
+                this.$emit('saveUser');
             }
         }
     }

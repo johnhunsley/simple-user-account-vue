@@ -32,7 +32,7 @@
             <button id="next" v-bind:disabled="!hasNext" value="Next" @click="searchItems(10,nextPageNumber)">Next</button>
             <button style="float: right" id="new" value="New" @click="showModal = true ;modalTitle = 'New User'">New</button>
         </div>
-        <modal v-show="showModal" v-on:resetShowModal="showModal = false">
+        <modal v-show="showModal" v-on:resetShowModal="resetForm()" v-on:saveUser="saveUser()">
             <h3 slot="header">{{modalTitle}}</h3>
             <div slot="body" class="formbody">
                 <div class="row">
@@ -111,6 +111,26 @@ export default {
                     this.$router.push('/login');
                 })
         },
+        resetForm : function() {
+            console.log('resetForm');
+            this.selectedUsername="";
+            this.selectedID="";
+            this.selectedFirstName="";
+            this.selectedLastName="";
+            this.selectedEmail="";
+            this.selectedEnabled="";
+            this.showModal = false;
+        },
+        saveUser : function() {
+            console.log('saveUser');
+            this.selectedUsername="";
+            this.selectedID="";
+            this.selectedFirstName="";
+            this.selectedLastName="";
+            this.selectedEmail="";
+            this.selectedEnabled="";
+            this.showModal = false;
+        },
         getItems: function(pageSize, pageNumber) {
             this.$http.get('http://localhost:8080/user/page/'+pageSize+"/"+pageNumber,
                 {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}})
@@ -158,24 +178,7 @@ export default {
         }
     },
     events: {
-        resetShowModal : function() {
-            this.selectedUsername="";
-            this.selectedID="";
-            this.selectedFirstName="";
-            this.selectedLastName="";
-            this.selectedEmail="";
-            this.selectedEnabled="";
-            this.showModal = false;
-        },
-        saveUser : function() {
-            this.selectedUsername="";
-            this.selectedID="";
-            this.selectedFirstName="";
-            this.selectedLastName="";
-            this.selectedEmail="";
-            this.selectedEnabled="";
-            this.showModal = false;
-        }
+
     }
 }
 </script>
