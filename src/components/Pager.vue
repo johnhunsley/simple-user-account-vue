@@ -37,23 +37,23 @@
             <div slot="body" class="formbody">
                 <div class="row">
                     <label class="left" for="selectedID">ID:</label>
-                    <input type="text" disabled class="formText, right" id="selectedID" v-model.trim="selectedID"/><br/>
+                    <input type="text" disabled class="formText, right" id="selectedID" v-model.trim="form.id"/><br/>
                 </div>
                 <div class="row">
                     <label class="left" for="selectedUsername">Username:</label>
-                    <input type="text" class="formText, right" id="selectedUsername" v-model.trim="selectedUsername"/>
+                    <input type="text" class="formText, right" id="selectedUsername" v-model.trim="form.username"/>
                 </div>
                 <div class="row">
                     <label class="left" for="selectedFirstName">First Name:</label>
-                    <input type="text" class="formText, right" id="selectedFirstName" v-model.trim="selectedFirstName"/>
+                    <input type="text" class="formText, right" id="selectedFirstName" v-model.trim="form.firstName"/>
                 </div>
                 <div class="row">
                     <label class="left" for="selectedLastName">Last Name:</label>
-                    <input type="text" class="formText, right" id="selectedLastName" v-model.trim="selectedLastName"/>
+                    <input type="text" class="formText, right" id="selectedLastName" v-model.trim="form.lastName"/>
                 </div>
                 <div class="row">
                     <label class="left" for="selectedEmail">Email:</label>
-                    <input type="text" class="formText, right" id="selectedEmail" v-model.trim="selectedEmail"/>
+                    <input type="text" class="formText, right" id="selectedEmail" v-model.trim="form.email"/>
                 </div>
             </div>
         </modal>
@@ -81,13 +81,15 @@ export default {
             hasPrevious: false,
             filter:"",
             modalTitle:"",
-            selectedID: "",
-            selectedUsername: "",
-            selectedFirstName:"",
-            selectedLastName:"",
-            selectedEmail:"",
-            selectedEnabled:false
-
+            form: {
+                class:"User",
+                id: "",
+                username: "",
+                firstName: "",
+                lastName: "",
+                email: "",
+                active: false
+            }
         }
     },
     mounted: function() {
@@ -99,12 +101,12 @@ export default {
                 {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}}).then(function successCallback(response) {
                     console.log(response.body);
                     this.modalTitle="Edit User";
-                    this.selectedUsername=response.body.username;
-                    this.selectedID=response.body.id;
-                    this.selectedFirstName=response.body.firstName;
-                    this.selectedLastName=response.body.lastName;
-                    this.selectedEmail=response.body.email;
-                    this.selectedEnabled=response.body.enabled;
+                    this.form.username=response.body.username;
+                    this.form.id=response.body.id;
+                    this.form.firstName=response.body.firstName;
+                    this.form.lastName=response.body.lastName;
+                    this.form.email=response.body.email;
+                    this.form.enabled=response.body.enabled;
                     this.showModal = true;
                 }, function errorCallback(response) {
                     console.log('Token expired, forcing client to re-authenitcate');
@@ -113,23 +115,31 @@ export default {
         },
         resetForm : function() {
             console.log('resetForm');
-            this.selectedUsername="";
-            this.selectedID="";
-            this.selectedFirstName="";
-            this.selectedLastName="";
-            this.selectedEmail="";
-            this.selectedEnabled="";
+            this.setCleanForm();
             this.showModal = false;
         },
         saveUser : function() {
-            console.log('saveUser');
-            this.selectedUsername="";
-            this.selectedID="";
-            this.selectedFirstName="";
-            this.selectedLastName="";
-            this.selectedEmail="";
-            this.selectedEnabled="";
-            this.showModal = false;
+            console.log(JSON.stringify(this.form));
+            //get form data and persist
+            this.$http.put('http://localhost:8080/user',
+                JSON.stringify(this.form),
+                {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}}).then(function successCallback(response){
+                    this.setCleanForm();
+                    this.showModal = false;
+                    console.log('....data saved successfully');
+                },function errorCallback(response) {
+                    console.log('Error, forcing client to re-authenitcate');
+                    this.showModal = false;
+                    this.$router.push('/login');
+                });
+        },
+        setCleanForm : function() {
+            this.form.username="";
+            this.form.id="";
+            this.form.firstName="";
+            this.form.lastName="";
+            this.form.email="";
+            this.form.enabled="";
         },
         getItems: function(pageSize, pageNumber) {
             this.$http.get('http://localhost:8080/user/page/'+pageSize+"/"+pageNumber,
@@ -141,7 +151,6 @@ export default {
                     this.$router.push('/login');
                 });
         },
-
         searchItems: function(pageSize, pageNumber) {
             this.$http.get('http://localhost:8080/user/search/'+pageSize+"/"+pageNumber+"?query="+this.filter,
                 {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}})
@@ -152,7 +161,6 @@ export default {
                     this.$router.push('/login');
                 });
         },
-
         calculatePage: function(data, pageNumber) {
             this.items = data.body.pagedItems;
             this.totalItems = data.body.totalItems;
