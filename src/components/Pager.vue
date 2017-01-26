@@ -35,26 +35,28 @@
         <modal v-show="showModal" v-on:resetShowModal="resetForm()" v-on:saveUser="saveUser()">
             <h3 slot="header">{{modalTitle}}</h3>
             <div slot="body" class="formbody">
-                <div class="row">
-                    <label class="left" for="selectedID">ID:</label>
-                    <input type="text" disabled class="formText, right" id="selectedID" v-model.trim="form.id"/><br/>
-                </div>
-                <div class="row">
-                    <label class="left" for="selectedUsername">Username:</label>
-                    <input type="text" class="formText, right" id="selectedUsername" v-model.trim="form.username"/>
-                </div>
-                <div class="row">
-                    <label class="left" for="selectedFirstName">First Name:</label>
-                    <input type="text" class="formText, right" id="selectedFirstName" v-model.trim="form.firstName"/>
-                </div>
-                <div class="row">
-                    <label class="left" for="selectedLastName">Last Name:</label>
-                    <input type="text" class="formText, right" id="selectedLastName" v-model.trim="form.lastName"/>
-                </div>
-                <div class="row">
-                    <label class="left" for="selectedEmail">Email:</label>
-                    <input type="text" class="formText, right" id="selectedEmail" v-model.trim="form.email"/>
-                </div>
+                <form name="userForm">
+                    <div class="row">
+                        <label class="left" for="selectedID">ID:</label>
+                        <input type="text" disabled class="formText, right" id="selectedID" v-model.trim="user.id"/><br/>
+                    </div>
+                    <div class="row">
+                        <label class="left" for="selectedUsername">Username:</label>
+                        <input type="text" class="formText, right" id="selectedUsername" v-model.trim="user.username"/>
+                    </div>
+                    <div class="row">
+                        <label class="left" for="selectedFirstName">First Name:</label>
+                        <input type="text" class="formText, right" id="selectedFirstName" v-model.trim="user.firstName"/>
+                    </div>
+                    <div class="row">
+                        <label class="left" for="selectedLastName">Last Name:</label>
+                        <input type="text" class="formText, right" id="selectedLastName" v-model.trim="user.lastName"/>
+                    </div>
+                    <div class="row">
+                        <label class="left" for="selectedEmail">Email:</label>
+                        <input type="text" class="formText, right" id="selectedEmail" v-model.trim="user.email"/>
+                    </div>
+                </form>
             </div>
         </modal>
     </div>
@@ -75,20 +77,14 @@ export default {
             items: [],
             totalPages: 0,
             totalItems: 0,
+            currentPage: 1,
             nextPageNumber: 1,
             hasNext:true,
             previousPageNumber: 1,
             hasPrevious: false,
             filter:"",
             modalTitle:"",
-            form: {
-                class:"User",
-                id: "",
-                username: "",
-                firstName: "",
-                lastName: "",
-                email: "",
-                active: false
+            user: {
             }
         }
     },
@@ -101,12 +97,7 @@ export default {
                 {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}}).then(function successCallback(response) {
                     console.log(response.body);
                     this.modalTitle="Edit User";
-                    this.form.username=response.body.username;
-                    this.form.id=response.body.id;
-                    this.form.firstName=response.body.firstName;
-                    this.form.lastName=response.body.lastName;
-                    this.form.email=response.body.email;
-                    this.form.enabled=response.body.enabled;
+                    this.user = response.body;
                     this.showModal = true;
                 }, function errorCallback(response) {
                     console.log('Token expired, forcing client to re-authenitcate');
@@ -115,31 +106,24 @@ export default {
         },
         resetForm : function() {
             console.log('resetForm');
-            this.setCleanForm();
             this.showModal = false;
+            this.user={};
         },
         saveUser : function() {
-            console.log(JSON.stringify(this.form));
+            console.log(JSON.stringify(this.user));
             //get form data and persist
             this.$http.put('http://localhost:8080/user',
-                JSON.stringify(this.form),
+                JSON.stringify(this.user),
                 {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}}).then(function successCallback(response){
-                    this.setCleanForm();
                     this.showModal = false;
+                    this.user={};
                     console.log('....data saved successfully');
+                    this.searchItems(10, this.currentPage);
                 },function errorCallback(response) {
                     console.log('Error, forcing client to re-authenitcate');
                     this.showModal = false;
                     this.$router.push('/login');
                 });
-        },
-        setCleanForm : function() {
-            this.form.username="";
-            this.form.id="";
-            this.form.firstName="";
-            this.form.lastName="";
-            this.form.email="";
-            this.form.enabled="";
         },
         getItems: function(pageSize, pageNumber) {
             this.$http.get('http://localhost:8080/user/page/'+pageSize+"/"+pageNumber,
@@ -162,6 +146,7 @@ export default {
                 });
         },
         calculatePage: function(data, pageNumber) {
+            this.currentPage = pageNumber;
             this.items = data.body.pagedItems;
             this.totalItems = data.body.totalItems;
             this.totalPages = data.body.totalPages;
