@@ -2,7 +2,7 @@
     <div id="pager" class="generic-container">
         <b>System Users</b><button style="float: right" id="logout" value="Log Out" @click="logout">Logout</button>
         <div class="section">
-            <input id="filterUsers" class="filter" type="text" @keyup="searchItems(10,1)" v-model.trim="filter"/>
+            <input id="filterUsers" class="filter" type="text" @keyup="searchItems(pageSize,1)" v-model.trim="filter"/>
         </div>
         <div class="section fixed-height">
             <table >
@@ -25,12 +25,26 @@
             </table>
         </div>
         <div class="section">
-            <button id="prev" v-bind:disabled="!hasPrevious" value="Prev" @click="searchItems(10,previousPageNumber)">Prev</button>
+            <button id="prev" v-bind:disabled="!hasPrevious" value="Prev" @click="searchItems(pageSize,previousPageNumber)">Prev</button>
                     <span v-for="n in totalPages">
-                        &nbsp;&nbsp;<span @click="searchItems(10,n)"><b>{{n}}</b></span>
+                        &nbsp;&nbsp;
+                        <span @click="searchItems(pageSize,n)">
+                            <b v-if="n == currentPage" class="highlighted">{{n}}</b>
+                            <b v-else>{{n}}</b>
+                        </span>
                     </span>
-            <button id="next" v-bind:disabled="!hasNext" value="Next" @click="searchItems(10,nextPageNumber)">Next</button>
-            <button style="float: right" id="new" value="New" @click="showModal = true ;modalTitle = 'New User'">New</button>
+            <button id="next" v-bind:disabled="!hasNext" value="Next" @click="searchItems(pageSize,nextPageNumber)">Next</button>
+            <span>
+                &nbsp;&nbsp;
+                <label class="left" for="pageSize">Items Per Page -&nbsp;&nbsp;</label>
+                <select id="pageSize" v-model="pageSize" @change="searchItems(pageSize,1)">
+                    <option>5</option>
+                    <option>10</option>
+                    <option>25</option>
+                    <option>50</option>
+                </select>
+            </span>
+            <button style="float: right" id="new" value="New" @click="showModal = true; modalTitle = 'New User'">New</button>
         </div>
         <modal v-show="showModal" v-on:resetShowModal="resetForm()" v-on:saveUser="saveUser()">
             <h3 slot="header">{{modalTitle}}</h3>
@@ -56,6 +70,10 @@
                         <label class="left" for="selectedEmail">Email:</label>
                         <input type="text" class="formText, right" id="selectedEmail" v-model.trim="user.email"/>
                     </div>
+                    <div class="row">
+                        <label class="left" for="selectedEnabled">Enabled:</label>
+                        <input type="checkbox" class="right" id="selectedEnabled" v-model.trim="user.active"/>
+                    </div>
                 </form>
             </div>
         </modal>
@@ -77,6 +95,7 @@ export default {
             items: [],
             totalPages: 0,
             totalItems: 0,
+            pageSize:10,
             currentPage: 1,
             nextPageNumber: 1,
             hasNext:true,
@@ -85,11 +104,13 @@ export default {
             filter:"",
             modalTitle:"",
             user: {
+                class:"User",
+                accountId:1
             }
         }
     },
     mounted: function() {
-        this.searchItems(10,1);
+        this.searchItems(this.pageSize,this.currentPage);
     },
     methods:{
         edit: function(userId) {
@@ -107,7 +128,10 @@ export default {
         resetForm : function() {
             console.log('resetForm');
             this.showModal = false;
-            this.user={};
+            this.user={
+                class:"User",
+                accountId:1
+            };
         },
         saveUser : function() {
             console.log(JSON.stringify(this.user));
@@ -115,13 +139,12 @@ export default {
             this.$http.put('http://localhost:8080/user',
                 JSON.stringify(this.user),
                 {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}}).then(function successCallback(response){
-                    this.showModal = false;
-                    this.user={};
+                    this.resetForm();
                     console.log('....data saved successfully');
-                    this.searchItems(10, this.currentPage);
+                    this.searchItems(this.pageSize, this.currentPage);
                 },function errorCallback(response) {
                     console.log('Error, forcing client to re-authenitcate');
-                    this.showModal = false;
+                    this.resetForm();
                     this.$router.push('/login');
                 });
         },
@@ -169,9 +192,6 @@ export default {
             auth.logout();
             this.$router.push('/login');
         }
-    },
-    events: {
-
     }
 }
 </script>
@@ -283,4 +303,8 @@ export default {
         .right {
         display:table-cell;
     }
+        .highlighted {
+        color:#00b300;
+    }
+
     </style>
