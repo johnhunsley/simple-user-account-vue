@@ -44,7 +44,7 @@
                     <option>50</option>
                 </select>
             </span>
-            <button style="float: right" id="new" value="New" @click="showModal = true; modalTitle = 'New User'">New</button>
+            <button style="float: right" id="new" value="New" @click="showModalForm(); modalTitle = 'New User'">New</button>
         </div>
         <modal v-show="showModal" v-on:resetShowModal="resetForm()" v-on:saveUser="saveUser()">
             <h3 slot="header">{{modalTitle}}</h3>
@@ -52,7 +52,11 @@
                 <form name="userForm">
                     <div class="row">
                         <label class="left" for="selectedID">ID:</label>
-                        <input type="text" disabled class="formText, right" id="selectedID" v-model.trim="user.id"/><br/>
+                        <span id="selectedID" />{{user.id}}<span/>
+                    </div>
+                    <div class="row">
+                        <label class="left" for="selectedEnabled">Enabled:</label>
+                        <input type="checkbox" class="right" id="selectedEnabled" v-model.trim="user.active"/>
                     </div>
                     <div class="row">
                         <label class="left" for="selectedUsername">Username:</label>
@@ -71,8 +75,11 @@
                         <input type="text" class="formText, right" id="selectedEmail" v-model.trim="user.email"/>
                     </div>
                     <div class="row">
-                        <label class="left" for="selectedEnabled">Enabled:</label>
-                        <input type="checkbox" class="right" id="selectedEnabled" v-model.trim="user.active"/>
+                        <label class="left" for="selectedRoles">Roles :</label>
+                        <div v-for="role in roles">
+                            <input type="checkbox" class="right" :id="role.id" :value="role" v-model="user.roles"/>&nbsp;{{role.authority}}
+                        </div>
+
                     </div>
                 </form>
             </div>
@@ -93,6 +100,7 @@ export default {
         return {
             showModal: false,
             items: [],
+            roles:[],
             totalPages: 0,
             totalItems: 0,
             pageSize:10,
@@ -119,7 +127,21 @@ export default {
                     console.log(response.body);
                     this.modalTitle="Edit User";
                     this.user = response.body;
-                    this.showModal = true;
+                    this.showModalForm();
+                }, function errorCallback(response) {
+                    console.log('Token expired, forcing client to re-authenitcate');
+                    this.$router.push('/login');
+                })
+        },
+        showModalForm: function() {
+            this.getAllRoles();
+            this.showModal = true;
+        },
+        getAllRoles: function() {
+            this.$http.get('http://localhost:8080/role',
+                {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}}).then(function successCallback(response) {
+                    console.log(response.body);
+                    this.roles = response.body;
                 }, function errorCallback(response) {
                     console.log('Token expired, forcing client to re-authenitcate');
                     this.$router.push('/login');
