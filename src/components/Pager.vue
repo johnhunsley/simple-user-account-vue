@@ -1,6 +1,6 @@
 <template>
     <div id="pager" class="generic-container">
-        <b>System Users</b><button style="float: right" id="logout" value="Log Out" @click="logout">Logout</button>
+        <a href="./users"><b>System Users</b></a><button style="float: right" id="logout" value="Log Out" @click="logout">Logout</button>
         <div class="section">
             <input id="filterUsers" class="filter" type="text" @keyup="searchItems(pageSize,1)" v-model.trim="filter"/>
         </div>
@@ -248,14 +248,13 @@ export default {
     }
 
         .filter {
-        width: auto;
-        min-width: 600px;
+        min-width: 100%;
     }
 
         table {
         margin-right: auto;
         table-layout: auto;
-        min-width: 600px;
+        min-width: 100%;
         float: none;
         border-collapse:collapse;
         border-spacing:0;
