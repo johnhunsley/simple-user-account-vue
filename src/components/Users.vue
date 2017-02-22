@@ -1,51 +1,11 @@
 <template>
-    <div id="pager" class="generic-container">
-        <a href="./users"><b>System Users</b></a><button style="float: right" id="logout" value="Log Out" @click="logout">Logout</button>
-        <div class="section">
-            <input id="filterUsers" class="filter" type="text" @keyup="searchItems(pageSize,1)" v-model.trim="filter"/>
-        </div>
-        <div class="section fixed-height">
-            <table >
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Email</th>
-                    <th>Enabled</th>
-                </tr>
-                <tr v-for="user in items" @click="edit(user.id)">
-                    <td>{{user.id}}</td>
-                    <td>{{user.username}}</td>
-                    <td>{{user.firstName}}</td>
-                    <td>{{user.lastName}}</td>
-                    <td>{{user.email}}</td>
-                    <td>{{user.active}}</td>
-                </tr>
-            </table>
-        </div>
-        <div class="section">
-            <button id="prev" v-bind:disabled="!hasPrevious" value="Prev" @click="searchItems(pageSize,previousPageNumber)">Prev</button>
-                    <span v-for="n in totalPages">
-                        &nbsp;&nbsp;
-                        <span @click="searchItems(pageSize,n)">
-                            <b v-if="n == currentPage" class="highlighted">{{n}}</b>
-                            <b v-else>{{n}}</b>
-                        </span>
-                    </span>
-            <button id="next" v-bind:disabled="!hasNext" value="Next" @click="searchItems(pageSize,nextPageNumber)">Next</button>
-            <span>
-                &nbsp;&nbsp;
-                <label class="left" for="pageSize">Items Per Page -&nbsp;&nbsp;</label>
-                <select id="pageSize" v-model="pageSize" @change="searchItems(pageSize,1)">
-                    <option>5</option>
-                    <option>10</option>
-                    <option>25</option>
-                    <option>50</option>
-                </select>
-            </span>
-            <button style="float: right" id="new" value="New" @click="showModalForm(); modalTitle = 'New User'">New</button>
-        </div>
+    <div>
+        <pager :on-search='searchItems' :on-select='edit' :col-names='colNames' :items='items' :total-pages="totalPages" :total-items="totalItems" :no-items-label='noUsers' :filter-placeholder="filterUsers" :select-id='selectedId'>
+            <div slot="additionalButtons">
+                <button style="float: right" id="new" value="New" @click="showModalForm(); modalTitle = 'New User'">New</button>
+            </div>
+        </pager>
+
         <modal v-show="showModal" v-on:resetShowModal="resetForm()" v-on:saveUser="saveUser()">
             <h3 slot="header">{{modalTitle}}</h3>
             <div slot="body" class="formbody">
@@ -88,12 +48,13 @@
 </template>
 
 <script>
+import Pager from 'vue-pager';
 import modal from './Modal.vue';
 import auth from './../auth.js';
 
 export default {
-    name: 'pager',
     components: {
+        pager,
         modal
     },
     data () {
@@ -103,13 +64,17 @@ export default {
             roles:[],
             totalPages: 0,
             totalItems: 0,
-            pageSize:10,
-            currentPage: 1,
-            nextPageNumber: 1,
-            hasNext:true,
-            previousPageNumber: 1,
-            hasPrevious: false,
-            filter:"",
+            colNames: [
+                {'label': 'ID', 'value': 'id'},
+                {'label': 'User Name', 'value': 'username'},
+                {'label': 'First Name', 'value': 'firstName'},
+                {'label': 'Last Name', 'value': 'lastName'},
+                {'label': 'Email', 'value': 'email'},
+                {'label': 'Enabled?', 'value': 'enabled'}
+            ],
+            noUsers: 'No Users',
+            filterUsers: 'Filter Users',
+            selectedId: 'id',
             modalTitle:"",
             user: {
                 class:"User",
@@ -170,16 +135,6 @@ export default {
                     this.$router.push('/login');
                 });
         },
-        getItems: function(pageSize, pageNumber) {
-            this.$http.get('http://localhost:8080/user/page/'+pageSize+"/"+pageNumber,
-                {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}})
-                .then(function successCallback(response){
-                    this.calculatePage(response, pageNumber);
-                },function errorCallback(response) {
-                    console.log('Token expired, forcing client to re-authenitcate');
-                    this.$router.push('/login');
-                });
-        },
         searchItems: function(pageSize, pageNumber) {
             this.$http.get('http://localhost:8080/user/search/'+pageSize+"/"+pageNumber+"?query="+this.filter,
                 {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}})
@@ -189,26 +144,6 @@ export default {
                     console.log('Token expired, forcing client to re-authenitcate');
                     this.$router.push('/login');
                 });
-        },
-        calculatePage: function(data, pageNumber) {
-            this.currentPage = pageNumber;
-            this.items = data.body.pagedItems;
-            this.totalItems = data.body.totalItems;
-            this.totalPages = data.body.totalPages;
-
-            if(pageNumber < this.totalPages) {
-                this.nextPageNumber = pageNumber +1;
-                this.hasNext = true;
-            } else {
-                this.hasNext = false;
-            }
-
-            if(pageNumber > 1) {
-                this.previousPageNumber = pageNumber -1;
-                this.hasPrevious = true;
-            } else {
-                this.hasPrevious = false;
-            }
         },
         logout : function() {
             auth.logout();

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueResource from 'vue-resource';
 import VueRouter from 'vue-router';
-import Pager from './components/Pager.vue';
+import Users from './components/Users.vue';
 import Login from './components/Login.vue';
 import auth from './auth'
 
@@ -24,7 +24,7 @@ export var router = new VueRouter({
   mode: 'history',
   routes : [
     {path: '/', redirect: '/users'},
-    {path: '/users', component: Pager, beforeEnter: requireAuth},
+    {path: '/users', component: Users, beforeEnter: requireAuth},
     {path: '/login', component: Login}
   ]
 });
