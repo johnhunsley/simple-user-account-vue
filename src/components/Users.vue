@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import Pager from 'vue-pager';
+import pager from 'vue-pager';
 import modal from './Modal.vue';
 import auth from './../auth.js';
 
@@ -81,9 +81,6 @@ export default {
                 accountId:1
             }
         }
-    },
-    mounted: function() {
-        this.searchItems(this.pageSize,this.currentPage);
     },
     methods:{
         edit: function(userId) {
@@ -135,11 +132,13 @@ export default {
                     this.$router.push('/login');
                 });
         },
-        searchItems: function(pageSize, pageNumber) {
-            this.$http.get('http://localhost:8080/user/search/'+pageSize+"/"+pageNumber+"?query="+this.filter,
+        searchItems: function(pageSize, pageNumber, filter) {
+            this.$http.get('http://localhost:8080/user/search/'+pageSize+"/"+pageNumber+"?query="+filter,
                 {headers:{'Cache-Control':'no-cache', 'X-Authorization':'Bearer '+auth.getToken()}})
                 .then(function successCallback(response) {
-                    this.calculatePage(response, pageNumber);
+                    this.items = response.body.pagedItems
+                    this.totalItems = response.body.totalItems
+                    this.totalPages = response.body.totalPages
                 },function errorCallback(response) {
                     console.log('Token expired, forcing client to re-authenitcate');
                     this.$router.push('/login');
